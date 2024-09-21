@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 import logging
+import re
 from typing import Final
 
 from homeassistant.components.sensor import (
@@ -614,7 +615,9 @@ class PolestarSensor(PolestarEntity, SensorEntity):
         if self.entity_description.key == 'battery_capacity':
             # remove the kWh from the value
             if isinstance(self._sensor_data, str):
-                self._sensor_data = self._sensor_data.replace(" kWh", "")
+                match = re.search(r'(\d+)\s*kWh', self._sensor_data)
+                if match:
+                    self._sensor_data = match.group(1)
             self._attr_native_value = self._sensor_data
 
         # if GUI changed the unit, we need to convert the value
